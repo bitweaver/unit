@@ -38,40 +38,37 @@ class TestDirFinder {
   // filter test directories can only be found in test directories
   function findTestDirectories ($rootDir)
   {
-    $tests[] = Array();
+    // print "findTestDirectories dir: $rootDir <br \>\n";
 
-    if (!is_dir ($rootDir)) {
-      // This is a failsafe in case we happen not to pass in a directory
-      return;
-    }
-
-    $rootDirHandle = opendir ($rootDir);
-    while (false !== ($subDir = readdir ($rootDirHandle))) {
-
-      if ('.' == $subDir || '..' == $subDir) {  
-	continue;
-      }
+    if (is_dir ($rootDir)) {
+      if ($rootDirHandle = opendir ($rootDir)) {
       
-      
-      $testDir = $rootDir . $subDir . '/';
-
-      if (is_dir ($testDir)) {
-	if ($subDir == $this->testDirName) {
-	  $this->tests[] = $testDir;
+	while (false !== ($subDir = readdir ($rootDirHandle))) {
 	  
-	  if ($this->fTestFilters) {
-	    $filterTestDir = $testDir . $this->filterTestDirName . '/';
-	    if (is_dir ($filterTestDir)) {
-	      $this->filterTests[] = $filterTestDir;
+	  if ('.' == $subDir || '..' == $subDir) {  
+	    continue;
+	  }
+      
+	  $testDir = $rootDir . $subDir . '/';
+
+	  if (is_dir ($testDir)) {
+	    if ($subDir == $this->testDirName) {
+	      $this->tests[] = $testDir;
+	      
+	      if ($this->fTestFilters) {
+		$filterTestDir = $testDir . $this->filterTestDirName . '/';
+		if (is_dir ($filterTestDir)) {
+		  $this->filterTests[] = $filterTestDir;
+		}
+	      }
 	    }
+
+	    $this->findTestDirectories($testDir);
 	  }
 	}
-	
-
-	$this->findTestDirectories($testDir);
+	closedir ($rootDirHandle);
       }
     }
-    closedir ($rootDirHandle);
   }
 
   function getTests ()
@@ -92,43 +89,41 @@ class TestCaseFinder {
 
   function TestCaseFinder ($dir)
   {
-    # print "TestCaseFinder dir: $dir <br \>\n";
-    if (!is_dir ($dir)) {
-      // This is a failsafe in case we happen not to pass in a directory
-      return;
-    }
+    // print "TestCaseFinder dir: $dir <br \>\n";
+    if (is_dir ($dir)) {
+      if ($dirHandle = opendir ($dir)) {
 
-    $dirHandle = opendir ($dir);
-    while (false !== ($file = readdir ($dirHandle))) {
-      $testFile = $dir . $file;
+	while (false !== ($file = readdir ($dirHandle))) {
+	  $testFile = $dir . $file;
 
-      # print "TestCaseFinder found $testFile <br \>\n";
-      if (!is_file ($testFile)) {
-	// Skip directories
-	continue;
-      }      
+	  // print "TestCaseFinder found $testFile <br \>\n";
+	  if (!is_file ($testFile)) {
+	    // Skip directories
+	    continue;
+	  }      
       
 
-      # print "TestCaseFinder accepted $file <br \>\n";
-      if (preg_match ('/^test.*\.php$/i', $file)) {
-	# exclude the parse error test from simle tests for now
-	# since all activities stop then.
-	# The test can most likely be reactivated when we have PHP5 exceptions
-	# and these are handled.
-	if (! 
-	    (preg_match ('!.*/simpletest/test/test_with_parse_error.php!',
-			 $testFile) ||
-	     preg_match ('!.*/simpletest/test/test_groups.php!',
-			 $testFile))
-
-	    ) {
-	  # print "TestCaseFinder added $testFile <br \>\n";
-	  $this->testFiles[] = $testFile;
-	  # print "TestCaseFinder After Add <br \>\n";
+	  // print "TestCaseFinder accepted $file <br \>\n";
+	  if (preg_match ('/^test.*\.php$/i', $file)) {
+	    // exclude the parse error test from simple tests for now
+	    // since all activities stop then.
+	    // The test can most likely be reactivated when we have PHP5 
+	    // exceptions and these are handled.
+	    if (! 
+		(preg_match ('!.*/simpletest/test/test_with_parse_error.php!',
+			     $testFile) ||
+		 preg_match ('!.*/simpletest/test/test_groups.php!',
+			     $testFile))
+		) {
+	      // print "TestCaseFinder added $testFile <br \>\n";
+	      $this->testFiles[] = $testFile;
+	      // print "TestCaseFinder After Add <br \>\n";
+	    }
+	  }
 	}
+	closedir ($dirHandle);
       }
     }
-    closedir ($dirHandle);
   }
 
 
