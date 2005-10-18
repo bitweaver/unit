@@ -5,8 +5,9 @@ require_once (KERNEL_PKG_PATH . 'BitBase.php');
 class TestDirFinder {
 
   var $fTestFilters;
-  var $tests       = Array ();
-  var $filterTests = Array ();
+  var $tests        = Array ();
+  var $filterTests  = Array ();
+  var $unopenedDirs = Array ();
 
   var $testDirName       = 'test';
   var $filterTestDirName = 'smarty_filter_tests';
@@ -41,7 +42,7 @@ class TestDirFinder {
     // print "findTestDirectories dir: $rootDir <br \>\n";
 
     if (is_dir ($rootDir)) {
-      if ($rootDirHandle = opendir ($rootDir)) {
+      if ($rootDirHandle = @opendir ($rootDir)) {
       
 	while (false !== ($subDir = readdir ($rootDirHandle))) {
 	  
@@ -68,6 +69,9 @@ class TestDirFinder {
 	}
 	closedir ($rootDirHandle);
       }
+      else {
+	$unopenedDirs[]=$rootDir;
+      }
     }
   }
 
@@ -79,6 +83,11 @@ class TestDirFinder {
   function getFilterTests ()
   {
     return $this->filterTests;
+  }
+
+  function getUnopenedDirs ()
+  {
+    return $this->unopenedDirs;
   }
 
 }

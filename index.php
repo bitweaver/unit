@@ -41,7 +41,9 @@ if ($testMode) {
   $testContainer = new TestDirFinder;
   
   $testContainer->findTests ('all');
-  $gBitSmarty->assign('tests', $testContainer->getTests ());
+  $gBitSmarty->assign('tests',        $testContainer->getTests ());
+  $gBitSmarty->assign('unopenedDirs', $testContainer->getUnopenedDirs());
+
 
   $test = &new GroupTest('All file tests');
 
